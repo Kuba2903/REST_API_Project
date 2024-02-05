@@ -26,5 +26,26 @@ namespace Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder options) =>
             options.UseSqlite($"Data Source ={DbPath}");
+
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+
+            //Creates a one to many relationship between Product and Inventory table's
+            modelBuilder.Entity<Inventory>()
+                .HasOne(e => e.Product)
+                .WithMany(e => e.Inventories)
+                .HasPrincipalKey(e => new { e.Id, e.SKU })
+                .HasForeignKey(e => new { e.product_id, e.SKU });
+
+            //Creates a one to one relationship between Product and Price table's
+            modelBuilder.Entity<Product>()
+                .HasOne<Price>(p => p.Price)
+                .WithOne(p => p.Product)
+                .HasPrincipalKey<Product>(p => new { p.Id, p.SKU })
+                .HasForeignKey<Price>(p => new { p.ProductId, p.SKU });
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

@@ -1,12 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebAPI.Models
 {
+    [PrimaryKey(nameof(product_id), nameof(SKU))]
     public class Inventory
     {
-        [Key]
-        public int Id { get; set; }
-
+        public int product_id { get; set; }
         [MaxLength(16)]
         public string SKU { get; set; }
 
@@ -19,5 +20,9 @@ namespace WebAPI.Models
         public string shipping_time { get; set; }
 
         public double shipping_cost { get; set; }
+
+        //Navigation property for a one to many relation with Products
+        public Product Product { get; set; }
+
     }
 }

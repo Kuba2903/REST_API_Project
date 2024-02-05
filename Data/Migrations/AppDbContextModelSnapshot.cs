@@ -18,12 +18,10 @@ namespace Data.Migrations
 
             modelBuilder.Entity("WebAPI.Models.Inventory", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("product_id")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("SKU")
-                        .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("TEXT");
 
@@ -45,19 +43,17 @@ namespace Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("product_id", "SKU");
 
                     b.ToTable("Inventory");
                 });
 
             modelBuilder.Entity("WebAPI.Models.Price", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("SKU")
-                        .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("TEXT");
 
@@ -73,7 +69,7 @@ namespace Data.Migrations
                     b.Property<short>("vat_rate")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
+                    b.HasKey("ProductId", "SKU");
 
                     b.ToTable("Prices");
                 });
@@ -81,17 +77,15 @@ namespace Data.Migrations
             modelBuilder.Entity("WebAPI.Models.Product", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("SKU")
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("EAN")
                         .IsRequired()
                         .HasMaxLength(13)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SKU")
-                        .IsRequired()
-                        .HasMaxLength(16)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("category")
@@ -119,9 +113,39 @@ namespace Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id", "SKU");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("WebAPI.Models.Inventory", b =>
+                {
+                    b.HasOne("WebAPI.Models.Product", "Product")
+                        .WithMany("Inventories")
+                        .HasForeignKey("product_id", "SKU")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("WebAPI.Models.Price", b =>
+                {
+                    b.HasOne("WebAPI.Models.Product", "Product")
+                        .WithOne("Price")
+                        .HasForeignKey("WebAPI.Models.Price", "ProductId", "SKU")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("WebAPI.Models.Product", b =>
+                {
+                    b.Navigation("Inventories");
+
+                    b.Navigation("Price")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
