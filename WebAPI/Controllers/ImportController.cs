@@ -1,5 +1,7 @@
 ﻿using CsvHelper;
 using Data;
+using Data.Data;
+using Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using WebAPI.Models;
@@ -10,9 +12,9 @@ namespace WebAPI.Controllers
     [ApiController]
     public class ImportController : Controller
     {
-        private readonly AppDbContext context;
+        private readonly ShopContext context;
 
-        public ImportController(AppDbContext context)
+        public ImportController(ShopContext context)
         {
             this.context = context;
         }
@@ -28,7 +30,7 @@ namespace WebAPI.Controllers
 
                 var products = ReadProducts(products_path);
 
-                var filteredProducts = products.Where(p => !p.category.Contains("kable")).ToList();
+                var filteredProducts = products.Where(p => !p.Category.Contains("kable")).ToList();
                 //gets the products that are not cables
 
                 context.Products.AddRange(filteredProducts);
@@ -54,10 +56,10 @@ namespace WebAPI.Controllers
                 
                 var inventory = ReadInventory(inventory_path);
                 
-                var filteredInventory = inventory.Where(i => i.shipping_time.Contains("24")).ToList();
+                var filteredInventory = inventory.Where(i => i.ShipTime.Contains("24")).ToList();
                 //gets only the inventory fields with shipping time up to 24 hours
-                
-                context.Inventory.AddRange(filteredInventory);
+
+                context.Inventories.AddRange(filteredInventory);
                 
                 context.SaveChanges();
             }
@@ -101,22 +103,22 @@ namespace WebAPI.Controllers
                     return BadRequest("sku cannot be empty");
 
 
-                var inventoryInfo = context.Inventory.FirstOrDefault(i => i.SKU == sku);
-                var priceInfo = context.Prices.FirstOrDefault(pr => pr.SKU == sku);
+                var inventoryInfo = context.Inventories.FirstOrDefault(i => i.Sku == sku);
+                var priceInfo = context.Prices.FirstOrDefault(pr => pr.Sku == sku);
 
                 var productInfo = context.Products
-                    .Where(p => p.SKU == sku)
+                    .Where(p => p.Sku == sku)
                     .Select(p => new
                     {
-                        p.name,
-                        p.EAN,
-                        p.producer_name,
-                        p.category,
-                        p.default_image,
-                        inventoryInfo.qty,
-                        inventoryInfo.unit,
-                        priceInfo.net_price,
-                        inventoryInfo.shipping_cost
+                        p.Name,
+                        p.Ean,
+                        p.ProducerName,
+                        p.Category,
+                        p.DefaultImage,
+                        inventoryInfo.Qty,
+                        inventoryInfo.Unit,
+                        priceInfo.NetPrice,
+                        inventoryInfo.ShipCost
 
                     }).FirstOrDefault();
 
