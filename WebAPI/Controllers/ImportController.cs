@@ -91,6 +91,47 @@ namespace WebAPI.Controllers
             return Ok("Successfull Import");
         }
 
+
+        [HttpGet("getProductInfo/{sku}")]
+        public IActionResult GetProductInfo(string sku)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(sku))
+                    return BadRequest("sku cannot be empty");
+
+
+                var inventoryInfo = context.Inventory.FirstOrDefault(i => i.SKU == sku);
+                var priceInfo = context.Prices.FirstOrDefault(pr => pr.SKU == sku);
+
+                var productInfo = context.Products
+                    .Where(p => p.SKU == sku)
+                    .Select(p => new
+                    {
+                        p.name,
+                        p.EAN,
+                        p.producer_name,
+                        p.category,
+                        p.default_image,
+                        inventoryInfo.qty,
+                        inventoryInfo.unit,
+                        priceInfo.net_price,
+                        inventoryInfo.shipping_cost
+
+                    }).FirstOrDefault();
+
+                if (productInfo == null || inventoryInfo == null || priceInfo == null)
+                    return NotFound("Product not found");
+
+                return Ok(productInfo);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
         /// <summary>
         /// Converts the file from csv file path to the List of products
         /// </summary>
